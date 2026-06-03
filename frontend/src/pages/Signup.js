@@ -1,60 +1,60 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
 
 function Signup() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: ""
+  });
 
- const [form,setForm]=useState({
-   name:"",
-   email:"",
-   password:""
- });
+  const navigate = useNavigate();
 
- const handleChange=(e)=>{
-   setForm({
-    ...form,
-    [e.target.name]:e.target.value
-   });
- };
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+  };
 
- const handleSubmit=async(e)=>{
-   e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-   const res=await axios.post(
-     "http://localhost:5000/api/auth/signup",
-     form
-   );
+  try {
+    await axios.post(
+      "http://localhost:5000/api/auth/signup",
+      form
+    );
 
-   alert(res.data.message);
- };
+    alert("Signup successful");
+    navigate("/");
 
- return(
-  <form onSubmit={handleSubmit}>
-   <h2>Signup</h2>
+  } catch (error) {
+    console.log("🔥 ERROR:", error.response?.data || error.message);
+    alert("Signup failed");
+  }
+};
 
-   <input
-    name="name"
-    placeholder="Name"
-    onChange={handleChange}
-   />
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <h2>Signup</h2>
 
-   <input
-    name="email"
-    placeholder="Email"
-    onChange={handleChange}
-   />
+        <input name="name" placeholder="Name" onChange={handleChange} />
+        <input name="email" placeholder="Email" onChange={handleChange} />
+        <input type="password" name="password" placeholder="Password" onChange={handleChange} />
 
-   <input
-    type="password"
-    name="password"
-    placeholder="Password"
-    onChange={handleChange}
-   />
+        <button type="submit">Register</button>
+      </form>
 
-   <button type="submit">
-    Register
-   </button>
-  </form>
- );
+      {/* Navigation button */}
+      <p>
+        Already have an account?{" "}
+        <Link to="/">Login</Link>
+      </p>
+    </div>
+  );
 }
 
 export default Signup;
