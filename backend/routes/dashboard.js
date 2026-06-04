@@ -3,25 +3,25 @@ const router = express.Router();
 const pool = require("../config/db");
 const { verifyToken } = require("../middleware/auth");
 
-// GET /api/dashboard/stats
 router.get("/stats", verifyToken, async (req, res) => {
   try {
-    const [employees, departments, skills, images] = await Promise.all([
-      pool.query("SELECT COUNT(*) FROM employee_profiles"),
-      pool.query("SELECT COUNT(*) FROM departments"),
-      pool.query("SELECT COUNT(*) FROM skills"),
-      pool.query("SELECT COUNT(*) FROM employee_images"),
+    const [emp, dep, skl, img, lt, la] = await Promise.all([
+      pool.query(`SELECT COUNT(*) FROM employee_profiles`),
+      pool.query(`SELECT COUNT(*) FROM departments`),
+      pool.query(`SELECT COUNT(*) FROM skills`),
+      pool.query(`SELECT COUNT(*) FROM employee_images`),
+      pool.query(`SELECT COUNT(*) FROM leave_types`),
+      pool.query(`SELECT COUNT(*) FROM leave_applications`),
     ]);
-
     res.json({
-      employees: parseInt(employees.rows[0].count),
-      departments: parseInt(departments.rows[0].count),
-      skills: parseInt(skills.rows[0].count),
-      images: parseInt(images.rows[0].count),
+      employees:   parseInt(emp.rows[0].count),
+      departments: parseInt(dep.rows[0].count),
+      skills:      parseInt(skl.rows[0].count),
+      images:      parseInt(img.rows[0].count),
+      leaveTypes:  parseInt(lt.rows[0].count),
+      totalLeaves: parseInt(la.rows[0].count),
     });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 module.exports = router;

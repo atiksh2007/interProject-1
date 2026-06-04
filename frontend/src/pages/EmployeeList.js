@@ -1,75 +1,58 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Layout from "../components/Layout";
+import Table from "../components/Table";
+import Button from "../components/Button";
+import { useAuth } from "../hooks/useAuth";
 import api from "../api";
 
-function EmployeeList() {
+const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
-  const role = localStorage.getItem("role");
+  const { isAdmin } = useAuth();
 
-  const fetchEmployees = async () => {
-    try {
-      const res = await api.get("/employees");
-      setEmployees(res.data);
-    } catch (err) {
-      console.log(err);
-    }
+  const fetch = async () => {
+    try { setEmployees((await api.get("/employees")).data); }
+    catch (err) { console.log(err); }
   };
 
-  useEffect(() => { fetchEmployees(); }, []);
+  useEffect(() => { fetch(); }, []);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this employee?")) return;
-    try {
-      await api.delete(`/employees/${id}`);
-      setEmployees(employees.filter((e) => e.id !== id));
-    } catch (err) {
-      alert(err.response?.data?.message || "Delete failed");
-    }
+  const del = async (id) => {
+    if (!window.confirm("Delete this employee? This cannot be undone.")) return;
+    try { await api.delete(`/employees/${id}`); fetch(); }
+    catch (err) { alert(err.response?.data?.message || "Delete failed"); }
   };
 
   return (
-    <div>
-      <h2>Employees</h2>
-      {role === "admin" && <Link to="/employees/create">+ Create Employee</Link>}
-
-      <table border="1" cellPadding="8" style={{ width: "100%", marginTop: "10px" }}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Designation</th>
-            <th>Phone</th>
-            <th>Salary</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.map((emp) => (
-            <tr key={emp.id}>
-              <td>{emp.id}</td>
-              <td>{emp.name}</td>
-              <td>{emp.department_name}</td>
-              <td>{emp.designation || "-"}</td>
-              <td>{emp.phone || "-"}</td>
-              <td>{emp.salary || "-"}</td>
-              <td>
-                <Link to={`/employees/${emp.id}`}>View</Link>
-                {role === "admin" && (
-                  <>
-                    {" | "}
-                    <Link to={`/employees/${emp.id}`} state={{ edit: true }}>Edit</Link>
-                    {" | "}
-                    <button onClick={() => handleDelete(emp.id)}>Delete</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Layout>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ color: "#1e293b", margin: 0 }}>👥 Employees</h2>
+        {isAdmin && <Link to="/employees/create"><Button variant="success">+ Create Employee</Button></Link>}
+      </div>
+      <Table
+        columns={[
+          { key: "id", label: "#" },
+          { key: "name", label: "Name" },
+          { key: "department_name",label: "Department" },
+          { key: "designation",label: "Designation" },
+          { key: "phone",label: "Phone" },
+          { key: "salary",label: "Salary", render: (r) => r.salary ? `₹${Number(r.salary).toLocaleString()}` : "-" },
+        ]}
+        rows={employees}
+        actions={(r) => (
+          <div style={{ display: "flex", gap: 6 }}>
+            <Link to={`/employees/${r.id}`}><Button>View</Button></Link>
+            {isAdmin && (
+              <>
+                <Link to={`/employees/${r.id}`} state={{ edit: true }}><Button variant="warning">Edit</Button></Link>
+                <Button variant="danger" onClick={() => del(r.id)}>Delete</Button>
+              </>
+            )}
+          </div>
+        )}
+      />
+    </Layout>
   );
-}
+};
 
 export default EmployeeList;
