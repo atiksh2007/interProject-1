@@ -1,12 +1,12 @@
 const pool = require("../config/db");
 
 module.exports = {
-  async create(employeeId, typeId, from, to, days, reason, approverId) {
+  async create(employeeId, typeId, from, to, days, reason, status, approverId) {
     const r = await pool.query(
       `INSERT INTO leave_applications
         (employee_id, leave_type_id, from_date, to_date, total_days, reason, status, current_approver_id)
-       VALUES ($1,$2,$3,$4,$5,$6,'pending_manager',$7) RETURNING *`,
-      [employeeId, typeId, from, to, days, reason, approverId]
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [employeeId, typeId, from, to, days, reason, status, approverId]
     );
     return r.rows[0];
   },

@@ -11,15 +11,31 @@ const statusColors = {
   "Manager Approved": { bg: "#dbeafe", color: "#1e40af" },
   Approved:           { bg: "#dcfce7", color: "#166534" },
   Rejected:           { bg: "#fee2e2", color: "#991b1b" },
+  Cancelled:          { bg: "#f1f5f9", color: "#475569" },
+};
+
+const statusMap = {
+  pending_manager: "Pending",
+  pending_hr: "Manager Approved",
+  approved: "Approved",
+  rejected: "Rejected",
+  cancelled: "Cancelled",
+};
+
+const actionMap = {
+  approved: "Approved",
+  rejected: "Rejected",
+  cancelled: "Cancelled",
 };
 
 const Badge = ({ status }) => {
-  const s = statusColors[status] || { bg: "#f1f5f9", color: "#475569" };
-  return <span style={{ background: s.bg, color: s.color, padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600 }}>{status}</span>;
+  const displayStatus = statusMap[status] || status;
+  const s = statusColors[displayStatus] || { bg: "#f1f5f9", color: "#475569" };
+  return <span style={{ background: s.bg, color: s.color, padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600 }}>{displayStatus}</span>;
 };
 
 const LeaveApprovals = () => {
-  const { isManager, isHR, isAdmin } = useAuth();
+  const { isManager, isHR } = useAuth();
   const [pending, setPending]   = useState([]);
   const [detail, setDetail]     = useState(null);
   const [remarks, setRemarks]   = useState("");
@@ -44,9 +60,9 @@ const LeaveApprovals = () => {
   };
 
   const act = async (id, action) => {
-    const endpoint = isManager ? `/leaves/${id}/manager-action` : `/leaves/${id}/hr-action`;
+    const endpoint = action === "Approved" ? `/leaves/${id}/approve` : `/leaves/${id}/reject`;
     try {
-      await api.put(endpoint, { action, remarks });
+      await api.put(endpoint, { remarks });
       setRemarks("");
       setDetail(null);
       fetchPending();
@@ -110,7 +126,7 @@ const LeaveApprovals = () => {
                 ["From",detail.leave.from_date],
                 ["To",detail.leave.to_date],
                 ["Total Days",detail.leave.total_days],
-                ["Status",detail.leave.status],
+                ["Status",statusMap[detail.leave.status] || detail.leave.status],
               ].map(([k, v]) => (
                 <div key={k} style={{ background: "#f8fafc", borderRadius: 6, padding: "10px 12px" }}>
                   <p style={{ margin: 0, fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase" }}>{k}</p>
@@ -126,13 +142,17 @@ const LeaveApprovals = () => {
             {detail.history?.length > 0 && (
               <>
                 <h4 style={{ color: "#475569", margin: "0 0 8px" }}>Approval History</h4>
-                {detail.history.map((h) => (
-                  <div key={h.id} style={{ borderLeft: `3px solid ${h.action === "Approved" ? "#16a34a" : "#dc2626"}`, paddingLeft: 12, marginBottom: 10 }}>
-                    <p style={{ margin: 0, fontWeight: 600, color: "#1e293b" }}>{h.approved_by_name} <span style={{ color: "#64748b", fontWeight: 400, fontSize: 13 }}>({h.approved_by_role})</span></p>
-                    <p style={{ margin: "2px 0", fontSize: 13, color: h.action === "Approved" ? "#16a34a" : "#dc2626" }}>{h.action}</p>
-                    {h.remarks && <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>{h.remarks}</p>}
-                  </div>
-                ))}
+                {detail.history.map((h) => {
+                  const displayAction = actionMap[h.action] || h.action;
+                  const isApp = h.action === "approved";
+                  return (
+                    <div key={h.id} style={{ borderLeft: `3px solid ${isApp ? "#16a34a" : "#dc2626"}`, paddingLeft: 12, marginBottom: 10 }}>
+                      <p style={{ margin: 0, fontWeight: 600, color: "#1e293b" }}>{h.approver_name} <span style={{ color: "#64748b", fontWeight: 400, fontSize: 13 }}>({h.approver_role})</span></p>
+                      <p style={{ margin: "2px 0", fontSize: 13, color: isApp ? "#16a34a" : "#dc2626" }}>{displayAction}</p>
+                      {h.remarks && <p style={{ margin: 0, fontSize: 13, color: "#64748b" }}>{h.remarks}</p>}
+                    </div>
+                  );
+                })}
               </>
             )}
           </div>

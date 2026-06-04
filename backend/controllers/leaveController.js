@@ -40,7 +40,31 @@ module.exports = {
 
   details: async (req, res) => {
     try {
-      res.json(await svc.details(req.params.id));
+      const data = await svc.details(req.params.id);
+      res.json(data.leave);
+    } catch (e) {
+      res.status(500).json({ message: e.message });
+    }
+  },
+
+  history: async (req, res) => {
+    try {
+      const data = await svc.details(req.params.id);
+      res.json(data.history);
+    } catch (e) {
+      res.status(500).json({ message: e.message });
+    }
+  },
+
+  pending: async (req, res) => {
+    try {
+      if (req.user.role === "manager") {
+        res.json(await svc.pendingManager(req.user.id));
+      } else if (["hr", "admin"].includes(req.user.role)) {
+        res.json(await repo.pendingForHR());
+      } else {
+        res.status(403).json({ message: "Forbidden" });
+      }
     } catch (e) {
       res.status(500).json({ message: e.message });
     }

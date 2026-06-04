@@ -13,13 +13,13 @@ const LeaveTypes = () => {
   const [editing, setEditing] = useState(null);
   const [open, setOpen]       = useState(false);
 
-  const fetch = async () => setTypes((await api.get("/leaves/types")).data);
+  const fetch = async () => setTypes((await api.get("/leave-types")).data);
   useEffect(() => { fetch(); }, []);
 
   const save = async () => {
     try {
-      if (editing) await api.put(`/leaves/types/${editing.id}`, form);
-      else         await api.post("/leaves/types", form);
+      if (editing) await api.put(`/leave-types/${editing.id}`, form);
+      else         await api.post("/leave-types", form);
       setOpen(false); setEditing(null); setForm({ leave_name: "", total_days: "" });
       fetch();
     } catch (err) { alert(err.response?.data?.message || "Error"); }
@@ -27,7 +27,7 @@ const LeaveTypes = () => {
 
   const remove = async (id) => {
     if (!window.confirm("Delete this leave type?")) return;
-    try { await api.delete(`/leaves/types/${id}`); fetch(); }
+    try { await api.delete(`/leave-types/${id}`); fetch(); }
     catch { alert("Cannot delete — may have existing applications"); }
   };
 

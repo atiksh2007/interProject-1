@@ -116,6 +116,20 @@ router.post("/me", verifyToken, async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
+router.put("/me", verifyToken, async (req, res) => {
+  try {
+    const { department_id, phone, address, designation, salary } = req.body;
+    const r = await pool.query(
+      `UPDATE employee_profiles
+          SET department_id=$1, phone=$2, address=$3, designation=$4, salary=$5
+        WHERE user_id=$6 RETURNING *`,
+      [department_id, phone, address, designation, salary, req.user.id]
+    );
+    if (r.rows.length === 0) return res.status(404).json({ message: "Profile not found" });
+    res.json(r.rows[0]);
+  } catch (e) { res.status(500).json({ message: e.message }); }
+});
+
 router.get("/me/skills", verifyToken, async (req, res) => {
   try {
     const p = await pool.query(`SELECT id FROM employee_profiles WHERE user_id=$1`, [req.user.id]);

@@ -15,6 +15,7 @@ router.get("/my", c.myLeaves);
 router.get("/balance", c.balance);
 
 // Manager / HR routes
+router.get("/pending", requireRole("manager", "hr", "admin"), c.pending);
 router.get("/pending/manager", requireRole("manager", "admin"), c.pendingManager);
 router.get("/pending/hr", requireRole("hr", "admin"), c.pendingHR);
 
@@ -32,6 +33,9 @@ router.put("/:id/reject",
 );
 
 router.put("/:id/cancel", c.cancel);
+
+// History and details
+router.get("/:id/history", c.history);
 
 // Keep this LAST so it doesn't catch routes like /types
 router.get("/:id", c.details);

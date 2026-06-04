@@ -12,11 +12,20 @@ const statusColors = {
   Cancelled:{ bg: "#f1f5f9", color: "#475569" },
 };
 
+const statusMap = {
+  pending_manager: "Pending",
+  pending_hr: "Manager Approved",
+  approved: "Approved",
+  rejected: "Rejected",
+  cancelled: "Cancelled",
+};
+
 const Badge = ({ status }) => {
-  const s = statusColors[status] || { bg: "#f1f5f9", color: "#475569" };
+  const displayStatus = statusMap[status] || status;
+  const s = statusColors[displayStatus] || { bg: "#f1f5f9", color: "#475569" };
   return (
     <span style={{ background: s.bg, color: s.color, padding: "4px 10px", borderRadius: 20, fontSize: 12, fontWeight: 600 }}>
-      {status}
+      {displayStatus}
     </span>
   );
 };
@@ -59,7 +68,7 @@ const MyLeaves = () => {
         ]}
         rows={leaves}
         actions={(r) =>
-          r.status === "Pending" || r.status === "Manager Approved"
+          r.status === "pending_manager" || r.status === "pending_hr"
             ? <Button variant="danger" onClick={() => cancel(r.id)}>Cancel</Button>
             : null
         }
