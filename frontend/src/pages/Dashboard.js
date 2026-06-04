@@ -1,68 +1,69 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api";
+
 function Dashboard() {
-  const [stats, setStats] = useState({
-    employees: 0,
-    departments: 0,
-    skills: 0,
-    images: 0
-  });
+  const [stats, setStats] = useState({ employees: 0, departments: 0, skills: 0, images: 0 });
+  const navigate = useNavigate();
 
-  const fetchStats = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/api/dashboard/stats"
-      );
-
-      setStats(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  const role = localStorage.getItem("role");
+  const name = localStorage.getItem("name");
 
   useEffect(() => {
-    fetchStats();
+    api.get("/dashboard/stats")
+      .then((res) => setStats(res.data))
+      .catch((err) => console.log(err));
   }, []);
 
-  const cardStyle = {
-    padding: "20px",
-    margin: "10px",
-    background: "#f5f5f5",
-    borderRadius: "10px",
-    width: "200px",
-    textAlign: "center"
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
   };
 
   return (
-   <div style={{ display: "flex", flexWrap: "wrap" }}>
+    <div>
+      <h2>Welcome, {name} ({role})</h2>
 
-  <Link
-    to="/employees"
-    style={{ textDecoration: "none", color: "inherit" }}
-  >
-    <div style={cardStyle}>
-      <h3>Employees</h3>
-      <h2>{stats.employees}</h2>
+      {/* Stats cards */}
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <div>
+          <h3>Employees</h3>
+          <p>{stats.employees}</p>
+        </div>
+        <div>
+          <h3>Departments</h3>
+          <p>{stats.departments}</p>
+        </div>
+        <div>
+          <h3>Skills</h3>
+          <p>{stats.skills}</p>
+        </div>
+        <div>
+          <h3>Images</h3>
+          <p>{stats.images}</p>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav style={{ marginTop: "20px" }}>
+        <Link to="/employees">Employees</Link> |{" "}
+        <Link to="/profile">My Profile</Link> |{" "}
+
+        {role === "employee" && (
+  <Link to="/my-skills">My Skills</Link>
+    )}
+        {/* Admin-only links */}
+        {role === "admin" && (
+          <>
+            <Link to="/employees/create">Create Employee</Link> |{" "}
+            <Link to="/departments">Departments</Link> |{" "}
+            <Link to="/skills">Skills</Link> |{" "}
+          </>
+        )}
+
+        <button onClick={handleLogout}>Logout</button>
+      </nav>
     </div>
-  </Link>
-
-  <div style={cardStyle}>
-    <h3>Departments</h3>
-    <h2>{stats.departments}</h2>
-  </div>
-
-  <div style={cardStyle}>
-    <h3>Skills</h3>
-    <h2>{stats.skills}</h2>
-  </div>
-
-  <div style={cardStyle}>
-    <h3>Images</h3>
-    <h2>{stats.images}</h2>
-  </div>
-
-</div>
   );
 }
 

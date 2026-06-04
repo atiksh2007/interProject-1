@@ -1,57 +1,37 @@
 import { useState } from "react";
-import axios from "axios";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import api from "../api";
 
 function Reset() {
-  const [form, setForm] = useState({
-    token: "",
-    newPassword: ""
-  });
+  const [searchParams] = useSearchParams();
+  const [newPassword, setNewPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
-  };
+  const token = searchParams.get("token") || "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/reset-password",
-        form
-      );
-
+      const res = await api.post("/auth/reset-password", { token, newPassword });
       alert(res.data.message);
-
+      navigate("/");
     } catch (err) {
-      console.log(err.response?.data || err.message);
-      alert("Reset failed");
+      alert(err.response?.data?.message || "Reset failed");
     }
   };
 
   return (
     <div>
       <h2>Reset Password</h2>
-
       <form onSubmit={handleSubmit}>
         <input
-          name="token"
-          placeholder="Enter reset token"
-          onChange={handleChange}
-        />
-
-        <input
           type="password"
-          name="newPassword"
           placeholder="New Password"
-          onChange={handleChange}
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
         />
-
-        <button type="submit">
-          Reset Password
-        </button>
+        <button type="submit">Reset Password</button>
       </form>
     </div>
   );
