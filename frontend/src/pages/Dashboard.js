@@ -1,69 +1,44 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
-function Dashboard() {
-  const [stats, setStats] = useState({
-    employees: 0,
-    departments: 0,
-    skills: 0,
-    images: 0
-  });
+import Layout from "../components/Layout";
+import Card from "../components/Card";
+import { useAuth } from "../hooks/useAuth";
+import api from "../api";
 
-  const fetchStats = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/api/dashboard/stats"
-      );
-
-      setStats(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+const Dashboard = () => {
+  const { user } = useAuth();
+  const [stats, setStats] = useState({});
+  const [summary, setSummary] = useState({});
 
   useEffect(() => {
-    fetchStats();
+    api.get("/dashboard/stats").then((r) => setStats(r.data)).catch(() => {});
+    api.get("/reports/summary").then((r) => setSummary(r.data)).catch(() => {});
   }, []);
 
-  const cardStyle = {
-    padding: "20px",
-    margin: "10px",
-    background: "#f5f5f5",
-    borderRadius: "10px",
-    width: "200px",
-    textAlign: "center"
-  };
-
   return (
-   <div style={{ display: "flex", flexWrap: "wrap" }}>
+    <Layout>
+      <div style={{ marginBottom: 28 }}>
+        <h2 style={{ margin: 0, color: "#1e293b", fontSize: 24 }}>Welcome back, {user?.name} 👋</h2>
+        <p style={{ color: "#64748b", margin: "4px 0 0 0", textTransform: "capitalize" }}>{user?.role} Dashboard</p>
+      </div>
 
-  <Link
-    to="/employees"
-    style={{ textDecoration: "none", color: "inherit" }}
-  >
-    <div style={cardStyle}>
-      <h3>Employees</h3>
-      <h2>{stats.employees}</h2>
-    </div>
-  </Link>
+      <h3 style={{ color: "#475569", fontSize: 14, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Company Overview</h3>
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 32 }}>
+        <Card title="Total Employees" value={stats.employees}   color="#2563eb" />
+        <Card title="Departments" value={stats.departments} color="#0891b2" />
+        <Card title="Skills" value={stats.skills}      color="#7c3aed" />
+        <Card title="Leave Types" value={stats.leaveTypes}  color="#d97706" />
+      </div>
 
-  <div style={cardStyle}>
-    <h3>Departments</h3>
-    <h2>{stats.departments}</h2>
-  </div>
-
-  <div style={cardStyle}>
-    <h3>Skills</h3>
-    <h2>{stats.skills}</h2>
-  </div>
-
-  <div style={cardStyle}>
-    <h3>Images</h3>
-    <h2>{stats.images}</h2>
-  </div>
-
-</div>
+      <h3 style={{ color: "#475569", fontSize: 14, textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Leave Summary</h3>
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+        <Card title="Total Requests"value={summary.total}           color="#64748b" />
+        <Card title="Pending Manager"value={summary.pending_manager} color="#d97706" />
+        <Card title="Pending HR"value={summary.pending_hr}      color="#0891b2" />
+        <Card title="Approved"value={summary.approved}        color="#16a34a" />
+        <Card title="Rejected"value={summary.rejected}        color="#dc2626" />
+      </div>
+    </Layout>
   );
-}
+};
 
 export default Dashboard;
