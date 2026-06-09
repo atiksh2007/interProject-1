@@ -11,15 +11,17 @@ const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
-  const [editForm, setEditForm] = useState({ department_id: "", phone: "", address: "", designation: "", salary: "" });
+  const [editForm, setEditForm] = useState({ department_id: "", phone: "", address: "", designation: "" });
   const [departments, setDepts] = useState([]);
   const nav = useNavigate();
 
   const fetchProfile = async () => {
     try {
-      const r = await api.get("/employees");
+      const r = await api.get("/employees/me");
       if (r.data.length > 0) {
         setProfile(r.data[0]);
+      } else {
+        setProfile(null);
       }
     } catch (err) {
       console.log(err);
@@ -39,10 +41,10 @@ const Profile = () => {
       phone:         profile.phone || "",
       address:       profile.address || "",
       designation:   profile.designation || "",
-      salary:        profile.salary || "",
     });
     setEditMode(true);
   };
+
 
   const saveEdit = async (e) => {
     e.preventDefault();

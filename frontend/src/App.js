@@ -22,6 +22,11 @@ import LeaveApprovals from "./pages/LeaveApprovals";
 import LeaveTypes from "./pages/LeaveTypes";
 import HRReports from "./pages/HRReports";
 import Notifications from "./pages/Notifications";
+import AssetManagement  from "./pages/AssetManagement";
+import MyAssets         from "./pages/MyAssets";
+import AuditTrail       from "./pages/AuditTrail";
+import AdvancedReports  from "./pages/AdvancedReports";
+import AdvancedDashboard from "./pages/AdvancedDashboard";
 
 function App() {
   return (
@@ -51,6 +56,11 @@ function App() {
           <Route path="/leave-types"element={<ProtectedRoute><LeaveTypes /></ProtectedRoute>} />
           <Route path="/hr-reports"element={<ProtectedRoute><HRReports /></ProtectedRoute>} />
           <Route path="/notifications"element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/assets"element={<ProtectedRoute><AssetManagement /></ProtectedRoute>} />
+          <Route path="/my-assets"element={<ProtectedRoute><MyAssets /></ProtectedRoute>} />
+          <Route path="/audit"element={<ProtectedRoute><AuditTrail /></ProtectedRoute>} />
+          <Route path="/advanced-reports"element={<ProtectedRoute><AdvancedReports /></ProtectedRoute>} />
+          <Route path="/analytics"element={<ProtectedRoute><AdvancedDashboard /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

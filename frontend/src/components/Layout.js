@@ -62,6 +62,7 @@ const Layout = ({ children }) => {
             <NavLink to="/my-leaves"      icon="📋" label="My Leaves" />
             <NavLink to="/leave-balance"  icon="💰" label="Leave Balance" />
             <NavLink to="/my-skills"      icon="🎯" label="My Skills" />
+             <NavLink to="/my-assets" icon="💼" label="My Assets" />
           </>}
 
           {/* Manager */}
@@ -76,18 +77,25 @@ const Layout = ({ children }) => {
             <NavLink to="/leave-approvals" icon="✅" label="Final Approvals" />
             <NavLink to="/leave-types"     icon="⚙️" label="Leave Types" />
             <NavLink to="/hr-reports"      icon="📈" label="Reports" />
+            <NavLink to="/assets"icon="💻" label="Asset Management" />
+            <NavLink to="/advanced-reports"icon="📋" label="Advanced Reports" />
+             <NavLink to="/analytics"icon="📊" label="Analytics" />
           </>}
 
           {/* Admin */}
           {isAdmin && <>
             <div style={{ color: "#334155", fontSize: 11, padding: "12px 14px 4px", textTransform: "uppercase", letterSpacing: 1 }}>Admin</div>
-            <NavLink to="/employees"        icon="👥" label="Employees" />
-            <NavLink to="/employees/create" icon="➕" label="Create Employee" />
-            <NavLink to="/departments"      icon="🏢" label="Departments" />
-            <NavLink to="/skills"           icon="🎯" label="Skills" />
-            <NavLink to="/leave-approvals"  icon="✅" label="All Approvals" />
-            <NavLink to="/leave-types"      icon="⚙️" label="Leave Types" />
-            <NavLink to="/hr-reports"       icon="📈" label="Reports" />
+            <NavLink to="/employees"icon="👥" label="Employees" />
+            <NavLink to="/employees/create"icon="➕" label="Create Employee" />
+            <NavLink to="/departments"icon="🏢" label="Departments" />
+            <NavLink to="/skills"icon="🎯" label="Skills" />
+            <NavLink to="/leave-approvals"icon="✅" label="All Approvals" />
+            <NavLink to="/leave-types"icon="⚙️" label="Leave Types" />
+            <NavLink to="/hr-reports"icon="📈" label="Reports" />
+            <NavLink to="/assets"icon="💻" label="Assets" />
+            <NavLink to="/audit"icon="🔍" label="Audit Trail" />
+            <NavLink to="/advanced-reports"icon="📋" label="Adv. Reports" />
+            <NavLink to="/analytics"icon="📊" label="Analytics" />
           </>}
         </nav>
 
