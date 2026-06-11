@@ -5,7 +5,6 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Forgot from "./pages/Forgot";
 import Reset from "./pages/Reset";
-import Verify from "./pages/Verify";
 import Dashboard from "./pages/Dashboard";
 import EmployeeList from "./pages/EmployeeList";
 import EmployeeDetail from "./pages/EmployeeDetail";
@@ -37,7 +36,6 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/reset" element={<Reset />} />
-          <Route path="/verify/:token" element={<Verify />} />
 
           <Route path="/dashboard"element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/profile"element={<ProtectedRoute><Profile /></ProtectedRoute>} />

@@ -9,15 +9,24 @@ const btn  = { width: "100%", padding: "12px 0", background: "#2563eb", color: "
 
 export const Forgot = () => {
   const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const submit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
     try {
       const r = await api.post("/auth/forgot-password", { email });
-      alert(r.data.message);
+      setMessage(r.data.message);
     } catch (err) {
-      alert(err.response?.data?.message || "Something went wrong");
+      setMessage(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <div style={card}>
       <div style={box}>
@@ -25,8 +34,11 @@ export const Forgot = () => {
         <p style={{ color: "#64748b", textAlign: "center", marginBottom: 24, fontSize: 14 }}>Enter your email to receive a reset link</p>
         <form onSubmit={submit}>
           <input type="email" placeholder="Email address" value={email} onChange={(e) => setEmail(e.target.value)} style={inp} required />
-          <button type="submit" style={btn}>Send Reset Link</button>
+          <button type="submit" disabled={loading} style={{ ...btn, opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer" }}>
+            {loading ? "Sending..." : "Send Reset Link"}
+          </button>
         </form>
+        {message && <p style={{ color: "#64748b", textAlign: "center", marginTop: 16, fontSize: 13 }}>{message}</p>}
         <p style={{ textAlign: "center", marginTop: 16, fontSize: 13 }}><Link to="/" style={{ color: "#2563eb" }}>Back to Login</Link></p>
       </div>
     </div>

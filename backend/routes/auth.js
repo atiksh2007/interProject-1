@@ -8,28 +8,35 @@ const { verifyToken, adminOnly } = require("../middleware/auth");
 const validate = require("../middleware/validate");
 const schemas = require("../utils/validators");
 const UserService = require("../services/userService");
+const { sendPasswordResetEmail } = require("../utils/mailer");
 
 router.post("/signup", validate(schemas.signup), async (req, res) => {
+  let client;
+
   try {
+    client = await pool.connect();
     const { name, email, password, role } = req.body;
-    const exists = await pool.query(`SELECT id FROM users WHERE email=$1`, [email]);
+    const exists = await client.query(`SELECT id FROM users WHERE email=$1`, [email]);
     if (exists.rows.length > 0) return res.status(400).json({ message: "Email already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
     const finalRole = ["admin", "hr", "manager", "employee"].includes(role) ? role : "employee";
 
-    const r = await pool.query(
-      `INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,$4) RETURNING id`,
+    await client.query("BEGIN");
+
+    const r = await client.query(
+      `INSERT INTO users(name,email,password,role,email_verified,verification_token)
+       VALUES($1,$2,$3,$4,true,NULL) RETURNING id`,
       [name, email, hashed, finalRole]
     );
 
     if (finalRole === "employee") {
-      const p = await pool.query(
+      const p = await client.query(
         `INSERT INTO employee_profiles(user_id) VALUES($1) RETURNING id`, [r.rows[0].id]
       );
-      const types = await pool.query(`SELECT id, total_days FROM leave_types`);
+      const types = await client.query(`SELECT id, total_days FROM leave_types`);
       for (const t of types.rows) {
-        await pool.query(
+        await client.query(
           `INSERT INTO leave_balance(employee_id, leave_type_id, available_days)
            VALUES($1,$2,$3) ON CONFLICT DO NOTHING`,
           [p.rows[0].id, t.id, t.total_days]
@@ -37,17 +44,17 @@ router.post("/signup", validate(schemas.signup), async (req, res) => {
       }
     }
 
-    const token = crypto.randomBytes(32).toString("hex");
-    await pool.query(
-      `INSERT INTO email_verification(user_id, token, expires_at) VALUES($1,$2,$3)`,
-      [r.rows[0].id, token, new Date(Date.now() + 3600 * 1000)]
-    );
+    await client.query("COMMIT");
 
     res.status(201).json({
-      message: "User created. Please verify your email.",
-      verificationLink: `http://localhost:3000/verify/${token}`,
+      message: "User created successfully. You can now log in.",
     });
-  } catch (e) { res.status(500).json({ message: e.message }); }
+  } catch (e) {
+    if (client) await client.query("ROLLBACK").catch(() => {});
+    res.status(500).json({ message: e.message });
+  } finally {
+    if (client) client.release();
+  }
 });
 
 router.post("/login", async (req, res) => {
@@ -67,35 +74,37 @@ router.post("/login", async (req, res) => {
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
-router.get("/verify-email/:token", async (req, res) => {
-  try {
-    const r = await pool.query(`SELECT * FROM email_verification WHERE token=$1`, [req.params.token]);
-    if (r.rows.length === 0) return res.status(400).json({ message: "Invalid token" });
-    if (new Date() > r.rows[0].expires_at) return res.status(400).json({ message: "Expired" });
-    await pool.query(`UPDATE users SET verified=true WHERE id=$1`, [r.rows[0].user_id]);
-    await pool.query(`DELETE FROM email_verification WHERE token=$1`, [req.params.token]);
-    res.json({ message: "Email verified" });
-  } catch (e) { res.status(500).json({ message: e.message }); }
-});
-
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
-    const r = await pool.query(`SELECT id FROM users WHERE email=$1`, [email]);
+    const r = await pool.query(`SELECT id, name, email FROM users WHERE email=$1`, [email]);
     if (r.rows.length === 0) return res.status(400).json({ message: "Email not found" });
     const token = crypto.randomBytes(32).toString("hex");
+    const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:3000").replace(/\/$/, "");
+    const resetLink = `${frontendUrl}/reset?token=${token}`;
+
     await pool.query(`DELETE FROM password_reset WHERE user_id=$1`, [r.rows[0].id]);
     await pool.query(
       `INSERT INTO password_reset(user_id, token, expires_at) VALUES($1,$2,$3)`,
       [r.rows[0].id, token, new Date(Date.now() + 3600 * 1000)]
     );
-    res.json({ message: "Reset link generated", resetLink: `http://localhost:3000/reset?token=${token}` });
+
+    await sendPasswordResetEmail({ to: r.rows[0].email, name: r.rows[0].name, resetLink });
+
+    res.json({
+      message: "Password reset link sent. Please check your email.",
+    });
   } catch (e) { res.status(500).json({ message: e.message }); }
 });
 
 router.post("/reset-password", async (req, res) => {
   try {
     const { token, newPassword } = req.body;
+    if (!token) return res.status(400).json({ message: "Reset token is required" });
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
     const r = await pool.query(`SELECT * FROM password_reset WHERE token=$1`, [token]);
     if (r.rows.length === 0) return res.status(400).json({ message: "Invalid token" });
     if (new Date() > r.rows[0].expires_at) return res.status(400).json({ message: "Expired" });

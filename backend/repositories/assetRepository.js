@@ -94,6 +94,15 @@ module.exports = {
       if (!ar.rows[0]) throw new Error("Asset not found");
       if (ar.rows[0].status !== "available") throw new Error("Asset is not available for allocation");
 
+      const er = await client.query(
+        `SELECT ep.user_id, u.name
+         FROM employee_profiles ep
+         JOIN users u ON ep.user_id = u.id
+         WHERE ep.id = $1`,
+        [employeeId]
+      );
+      if (!er.rows[0]) throw new Error("Employee not found");
+
       // Create allocation record
       const alloc = await client.query(
         `INSERT INTO asset_allocations (asset_id, employee_id, allocated_by, allocated_date, status, notes)
@@ -113,6 +122,16 @@ module.exports = {
         `INSERT INTO asset_history (asset_id, action, created_by, remarks)
          VALUES ($1, 'allocated', $2, $3)`,
         [assetId, allocatedBy, notes || "Allocated to employee"]
+      );
+
+      await client.query(
+        `INSERT INTO notifications(user_id, title, message, type, link)
+         VALUES($1, $2, $3, 'info', '/my-assets')`,
+        [
+          er.rows[0].user_id,
+          "Asset Assigned",
+          `You have been assigned ${ar.rows[0].asset_name} (${ar.rows[0].asset_code})`,
+        ]
       );
 
       await client.query("COMMIT");
