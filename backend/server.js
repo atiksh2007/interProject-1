@@ -18,12 +18,20 @@ const leaveTypeRoutes    = require("./routes/leaveTypes");
 const notificationRoutes = require("./routes/notifications");
 const reportRoutes       = require("./routes/reports");
 
+
+const assetRoutes         = require("./routes/assets");
+const auditRoutes         = require("./routes/audit");
+const advancedReportRoutes = require("./routes/reports.advanced");
+
+
 const { apiLimiter, authLimiter } = require("./middleware/rateLimiter");
 
 const app = express();
 
 // Security & parsers
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
 app.use(cors());
 app.use(express.json({ limit: "5mb" }));
 
@@ -45,6 +53,11 @@ app.use("/api/leaves",        leaveRoutes);
 app.use("/api/leave-types",   leaveTypeRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/reports",       reportRoutes);
+app.use("/api/assets",  assetRoutes);
+app.use("/api/audit",   auditRoutes);
+app.use("/api/reports", advancedReportRoutes);
+
+
 
 // Swagger docs
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -5,10 +5,10 @@ import api from "../api";
 
 const roleColors = {
   admin:    "#7c3aed",
-  manager:  "#2563eb",
-  hr:       "#0891b2",
   employee: "#16a34a",
 };
+
+const frontPageRoles = ["admin", "employee"];
 
 const Login = () => {
   const [role, setRole] = useState(null);
@@ -57,7 +57,7 @@ const Login = () => {
         <h1 style={{ color: "#fff", fontSize: 28, marginBottom: 8 }}>i-SOFTZONE HRMS</h1>
         <p style={{ color: "#94a3b8", marginBottom: 40 }}>Select your role to continue</p>
         <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-          {["admin", "manager", "hr", "employee"].map((r) => (
+          {frontPageRoles.map((r) => (
             <button key={r} onClick={() => setRole(r)} style={{
               padding: "20px 32px", background: roleColors[r],
               color: "#fff", border: "none", borderRadius: 10,

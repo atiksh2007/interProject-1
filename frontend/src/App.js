@@ -5,7 +5,6 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Forgot from "./pages/Forgot";
 import Reset from "./pages/Reset";
-import Verify from "./pages/Verify";
 import Dashboard from "./pages/Dashboard";
 import EmployeeList from "./pages/EmployeeList";
 import EmployeeDetail from "./pages/EmployeeDetail";
@@ -22,6 +21,11 @@ import LeaveApprovals from "./pages/LeaveApprovals";
 import LeaveTypes from "./pages/LeaveTypes";
 import HRReports from "./pages/HRReports";
 import Notifications from "./pages/Notifications";
+import AssetManagement  from "./pages/AssetManagement";
+import MyAssets         from "./pages/MyAssets";
+import AuditTrail       from "./pages/AuditTrail";
+import AdvancedReports  from "./pages/AdvancedReports";
+import AdvancedDashboard from "./pages/AdvancedDashboard";
 
 function App() {
   return (
@@ -32,7 +36,6 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot" element={<Forgot />} />
           <Route path="/reset" element={<Reset />} />
-          <Route path="/verify/:token" element={<Verify />} />
 
           <Route path="/dashboard"element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/profile"element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -51,6 +54,11 @@ function App() {
           <Route path="/leave-types"element={<ProtectedRoute><LeaveTypes /></ProtectedRoute>} />
           <Route path="/hr-reports"element={<ProtectedRoute><HRReports /></ProtectedRoute>} />
           <Route path="/notifications"element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/assets"element={<ProtectedRoute><AssetManagement /></ProtectedRoute>} />
+          <Route path="/my-assets"element={<ProtectedRoute><MyAssets /></ProtectedRoute>} />
+          <Route path="/audit"element={<ProtectedRoute><AuditTrail /></ProtectedRoute>} />
+          <Route path="/advanced-reports"element={<ProtectedRoute><AdvancedReports /></ProtectedRoute>} />
+          <Route path="/analytics"element={<ProtectedRoute><AdvancedDashboard /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

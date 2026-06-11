@@ -31,14 +31,14 @@ const EmployeeList = () => {
       </div>
       <Table
         columns={[
-          { key: "id", label: "#" },
+          { key: "serial_no", label: "#" },
           { key: "name", label: "Name" },
           { key: "department_name",label: "Department" },
           { key: "designation",label: "Designation" },
           { key: "phone",label: "Phone" },
           { key: "salary",label: "Salary", render: (r) => r.salary ? `₹${Number(r.salary).toLocaleString()}` : "-" },
         ]}
-        rows={employees}
+        rows={employees.map((employee, index) => ({ ...employee, serial_no: index + 1 }))}
         actions={(r) => (
           <div style={{ display: "flex", gap: 6 }}>
             <Link to={`/employees/${r.id}`}><Button>View</Button></Link>
