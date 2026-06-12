@@ -75,7 +75,12 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📘 Swagger docs:  http://localhost:${PORT}/api/docs`);
-});
+
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📘 Swagger docs:  http://localhost:${PORT}/api/docs`);
+  });
+}
+
+module.exports = app;
