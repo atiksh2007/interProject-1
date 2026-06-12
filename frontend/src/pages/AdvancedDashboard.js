@@ -23,19 +23,19 @@ const ChartCard = ({ title, children, style = {}, span = 1 }) => (
   </div>
 );
 
-const CustomTooltip = ({ active, payload, label, prefix = "", suffix = "" }) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: "10px 14px", fontSize: 13 }}>
-      <p style={{ margin: "0 0 4px", fontWeight: 600, color: "#1e293b" }}>{label}</p>
-      {payload.map((p, i) => (
-        <p key={i} style={{ margin: "2px 0", color: p.color }}>
-          {p.name}: <b>{prefix}{typeof p.value === "number" ? p.value.toLocaleString() : p.value}{suffix}</b>
-        </p>
-      ))}
-    </div>
-  );
-};
+// const CustomTooltip = ({ active, payload, label, prefix = "", suffix = "" }) => {
+//   if (!active || !payload?.length) return null;
+//   return (
+//     <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: "10px 14px", fontSize: 13 }}>
+//       <p style={{ margin: "0 0 4px", fontWeight: 600, color: "#1e293b" }}>{label}</p>
+//       {payload.map((p, i) => (
+//         <p key={i} style={{ margin: "2px 0", color: p.color }}>
+//           {p.name}: <b>{prefix}{typeof p.value === "number" ? p.value.toLocaleString() : p.value}{suffix}</b>
+//         </p>
+//       ))}
+//     </div>
+//   );
+// };
 
 export default function AdvancedDashboard() {
   const [stats,       setStats]      = useState({});

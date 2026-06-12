@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
@@ -64,7 +64,7 @@ const EmployeeDetail = () => {
   const [leaveHistory, setLeaveHistory] = useState([]);
   const [assets, setAssets]             = useState([]);
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     try {
       const [empRes, attRes, leaveRes] = await Promise.all([
         api.get(`/employees/${id}`),
@@ -88,12 +88,15 @@ const EmployeeDetail = () => {
       }).catch(() => ({ data: [] }));
       setAssets(allocRes.data);
     } catch (err) { console.error(err); }
-  };
+  },[id]);
 
-  useEffect(() => {
-    fetchAll();
-    if (isAdmin) api.get("/departments").then((r) => setDepts(r.data));
-  }, [id]);
+useEffect(() => {
+  fetchAll();
+
+  if (isAdmin) {
+    api.get("/departments").then((r) => setDepts(r.data));
+  }
+}, [fetchAll, isAdmin]);
 
   const saveEdit = async (e) => {
     e.preventDefault();
