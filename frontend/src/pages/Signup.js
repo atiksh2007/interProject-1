@@ -1,60 +1,160 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import api from "../api";
 
-function Signup() {
+const inp = {
+  display: "block",
+  padding: "10px 14px",
+  margin: "10px 0",
+  width: "100%",
+  border: "1px solid #e2e8f0",
+  borderRadius: 8,
+  fontSize: 14,
+  boxSizing: "border-box",
+  background: "#f8fafc"
+};
+
+const Signup = () => {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: ""
+    password: "",
+    confirmPassword: "",
+    role: "employee"
   });
 
-  const navigate = useNavigate();
+  const nav = useNavigate();
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+  const handle = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const submit = async (e) => {
+    e.preventDefault();
+
+    // ✅ frontend validation
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      await api.post("/auth/signup", {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.role
+      });
+
+      alert("Signup successful! You can now login.");
+      nav("/");
+    } catch (err) {
+      alert(err.response?.data?.message || "Signup failed");
+    }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  try {
-    await axios.post(
-      "http://localhost:5000/api/auth/signup",
-      form
-    );
-
-    alert("Signup successful");
-    navigate("/");
-
-  } catch (error) {
-    console.log("🔥 ERROR:", error.response?.data || error.message);
-    alert("Signup failed");
-  }
-};
-
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <h2>Signup</h2>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#0f172a",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Segoe UI', sans-serif"
+      }}
+    >
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: 12,
+          padding: 36,
+          width: 380,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.4)"
+        }}
+      >
+        <h2 style={{ margin: "0 0 24px", color: "#1e293b", textAlign: "center" }}>
+          Create Account
+        </h2>
 
-        <input name="name" placeholder="Name" onChange={handleChange} />
-        <input name="email" placeholder="Email" onChange={handleChange} />
-        <input type="password" name="password" placeholder="Password" onChange={handleChange} />
+        <form onSubmit={submit}>
+          <input
+            name="name"
+            placeholder="Full Name"
+            onChange={handle}
+            style={inp}
+            required
+          />
 
-        <button type="submit">Register</button>
-      </form>
+          <input
+            name="email"
+            type="email"
+            placeholder="Email Address"
+            onChange={handle}
+            style={inp}
+            required
+          />
 
-      {/* Navigation button */}
-      <p>
-        Already have an account?{" "}
-        <Link to="/">Login</Link>
-      </p>
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            onChange={handle}
+            style={inp}
+            required
+          />
+
+          {/* ✅ Confirm Password */}
+          <input
+            name="confirmPassword"
+            type="password"
+            placeholder="Confirm Password"
+            onChange={handle}
+            style={inp}
+            required
+          />
+
+          <select name="role" onChange={handle} style={inp}>
+            <option value="employee">Employee</option>
+            <option value="manager">Manager</option>
+            <option value="hr">HR</option>
+            <option value="admin">Admin</option>
+          </select>
+
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "12px 0",
+              background: "#2563eb",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: "pointer",
+              marginTop: 8
+            }}
+          >
+            Register
+          </button>
+        </form>
+
+        <p
+          style={{
+            textAlign: "center",
+            marginTop: 16,
+            fontSize: 13,
+            color: "#64748b"
+          }}
+        >
+          Already have an account?{" "}
+          <Link to="/" style={{ color: "#2563eb" }}>
+            Login
+          </Link>
+        </p>
+      </div>
     </div>
   );
-}
+};
 
 export default Signup;

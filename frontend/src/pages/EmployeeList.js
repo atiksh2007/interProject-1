@@ -1,68 +1,58 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
-function EmployeeList() {
+import Layout from "../components/Layout";
+import Table from "../components/Table";
+import Button from "../components/Button";
+import { useAuth } from "../hooks/useAuth";
+import api from "../api";
+
+const EmployeeList = () => {
   const [employees, setEmployees] = useState([]);
+  const { isAdmin } = useAuth();
 
-  const fetchEmployees = async () => {
-    try {
-      const res = await axios.get(
-        "http://localhost:5000/api/employees"
-      );
-
-      setEmployees(res.data);
-    } catch (err) {
-      console.log("Error fetching employees:", err);
-    }
+  const fetch = async () => {
+    try { setEmployees((await api.get("/employees")).data); }
+    catch (err) { console.log(err); }
   };
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
+  useEffect(() => { fetch(); }, []);
+
+  const del = async (id) => {
+    if (!window.confirm("Delete this employee? This cannot be undone.")) return;
+    try { await api.delete(`/employees/${id}`); fetch(); }
+    catch (err) { alert(err.response?.data?.message || "Delete failed"); }
+  };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Employee List</h2>
-
-      <table
-        border="1"
-        cellPadding="10"
-        style={{ width: "100%", marginTop: "20px" }}
-      >
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Department</th>
-            <th>Phone</th>
-            <th>Salary</th>
-            <th>Created At</th>
-          </tr>
-        </thead>
-
-<tbody>
-  {employees.map((emp) => (
-    <tr key={emp.id}>
-      <td>{emp.id}</td>
-      <td>{emp.name}</td>
-      <td>{emp.department_name}</td>
-      <td>{emp.phone || "-"}</td>
-      <td>{emp.salary || "-"}</td>
-      <td>{emp.created_at}</td>
-
-      <td>
-        <Link to={`/employees/${emp.id}`}>
-          <button>
-            View Details
-          </button>
-        </Link>
-      </td>
-    </tr>
-  ))}
-</tbody>
-      </table>
-    </div>
+    <Layout>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ color: "#1e293b", margin: 0 }}>👥 Employees</h2>
+        {isAdmin && <Link to="/employees/create"><Button variant="success">+ Create Employee</Button></Link>}
+      </div>
+      <Table
+        columns={[
+          { key: "serial_no", label: "#" },
+          { key: "name", label: "Name" },
+          { key: "department_name",label: "Department" },
+          { key: "designation",label: "Designation" },
+          { key: "phone",label: "Phone" },
+          { key: "salary",label: "Salary", render: (r) => r.salary ? `₹${Number(r.salary).toLocaleString()}` : "-" },
+        ]}
+        rows={employees.map((employee, index) => ({ ...employee, serial_no: index + 1 }))}
+        actions={(r) => (
+          <div style={{ display: "flex", gap: 6 }}>
+            <Link to={`/employees/${r.id}`}><Button>View</Button></Link>
+            {isAdmin && (
+              <>
+                <Link to={`/employees/${r.id}`} state={{ edit: true }}><Button variant="warning">Edit</Button></Link>
+                <Button variant="danger" onClick={() => del(r.id)}>Delete</Button>
+              </>
+            )}
+          </div>
+        )}
+      />
+    </Layout>
   );
-}
+};
 
 export default EmployeeList;
