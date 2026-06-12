@@ -58,8 +58,8 @@ const Layout = ({ children }) => {
           {/* Employee only */}
           {isEmployee && <>
             <div style={{ color: "#334155", fontSize: 11, padding: "12px 14px 4px", textTransform: "uppercase", letterSpacing: 1 }}>Leave</div>
-            <NavLink to="/apply-leave"    icon="📝" label="Apply Leave" />
-            <NavLink to="/my-leaves"      icon="📋" label="My Leaves" />
+            {!isAdmin && <NavLink to="/apply-leave"    icon="📝" label="Apply Leave" />}
+            {!isAdmin && <NavLink to="/my-leaves"      icon="📋" label="My Leaves" />}
             <NavLink to="/leave-balance"  icon="💰" label="Leave Balance" />
             <NavLink to="/my-skills"      icon="🎯" label="My Skills" />
              <NavLink to="/my-assets" icon="💼" label="My Assets" />

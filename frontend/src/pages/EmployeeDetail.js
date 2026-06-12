@@ -131,7 +131,8 @@ const EmployeeDetail = () => {
 
   // ── Attendance chart data ──────────────────────────────────────────
   const attCounts = attendance.reduce((acc, r) => {
-    const s = r.status || "Unknown";
+    let s = r.status || "Unknown";
+    s = s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
     acc[s] = (acc[s] || 0) + 1;
     return acc;
   }, {});
@@ -141,7 +142,9 @@ const EmployeeDetail = () => {
   const monthlyAtt = attendance.reduce((acc, r) => {
     const m = r.date ? r.date.slice(0, 7) : "N/A";
     if (!acc[m]) acc[m] = { month: m, Present: 0, Absent: 0 };
-    acc[m][r.status] = (acc[m][r.status] || 0) + 1;
+    let s = r.status || "Unknown";
+    s = s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+    acc[m][s] = (acc[m][s] || 0) + 1;
     return acc;
   }, {});
   const monthlyAttArr = Object.values(monthlyAtt).slice(-6);
