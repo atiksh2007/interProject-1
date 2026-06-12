@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 import Button from "../components/Button";
 import { useAuth } from "../hooks/useAuth";
 import api from "../api";
-
+import { PieChart, Pie, Tooltip, Legend, Cell } from "recharts";
 const inp = { display: "block", padding: "10px 14px", margin: "8px 0 16px", width: "100%", border: "1px solid #e2e8f0", borderRadius: 8, fontSize: 14, boxSizing: "border-box", background: "#f8fafc" };
 
 const EmployeeDetail = () => {
@@ -17,11 +17,16 @@ const EmployeeDetail = () => {
   const [editForm, setEditForm] = useState({});
   const [departments, setDepts] = useState([]);
   const [files, setFiles]       = useState([]);
-
+  const [attendance, setAttendance] = useState([]);
   const fetch = async () => {
     try {
       const r = await api.get(`/employees/${id}`);
       setData(r.data);
+
+      const att = await api.get(`/attendance/employee/${id}`);
+      setAttendance(att.data);
+
+
       setEditForm({
         department_id: r.data.employee.department_id,
         phone:         r.data.employee.phone        || "",
@@ -62,6 +67,26 @@ const EmployeeDetail = () => {
   if (!data) return <Layout><p>Loading...</p></Layout>;
 
   const { employee, skills, images } = data;
+
+
+
+  const attendanceChart = [
+  {
+    name: "Present",
+    value: attendance.filter(
+      a => a.status === "Present"
+    ).length
+  },
+  {
+    name: "Absent",
+    value: attendance.filter(
+      a => a.status === "Absent"
+    ).length
+  }
+];
+
+
+
 
   const row = (label, value) => (
     <div style={{ display: "flex", padding: "11px 0", borderBottom: "1px solid #f1f5f9" }}>
@@ -121,6 +146,38 @@ const EmployeeDetail = () => {
               </div>
             )}
           </div>
+
+
+
+            <div style={{background:"#fff", padding:24, borderRadius:10}}>
+
+<h3>📊 Attendance</h3>
+
+<PieChart width={300} height={250}>
+
+<Pie
+data={attendanceChart}
+dataKey="value"
+nameKey="name"
+cx="50%"
+cy="50%"
+outerRadius={80}
+label
+>
+
+{attendanceChart.map((x,i)=>
+<Cell key={i}/>
+)}
+
+</Pie>
+
+<Tooltip/>
+<Legend/>
+
+</PieChart>
+
+</div>
+
 
           <div style={{ background: "#fff", borderRadius: 10, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
             <h3 style={{ margin: "0 0 12px", color: "#1e293b" }}>🖼️ Images</h3>

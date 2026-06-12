@@ -17,7 +17,7 @@ const leaveRoutes        = require("./routes/leaves");
 const leaveTypeRoutes    = require("./routes/leaveTypes");
 const notificationRoutes = require("./routes/notifications");
 const reportRoutes       = require("./routes/reports");
-
+const attendanceRoutes = require("./routes/attendance");
 
 const assetRoutes         = require("./routes/assets");
 const auditRoutes         = require("./routes/audit");
@@ -56,7 +56,7 @@ app.use("/api/reports",       reportRoutes);
 app.use("/api/assets",  assetRoutes);
 app.use("/api/audit",   auditRoutes);
 app.use("/api/reports", advancedReportRoutes);
-
+app.use("/api/attendance", attendanceRoutes);
 
 
 // Swagger docs
