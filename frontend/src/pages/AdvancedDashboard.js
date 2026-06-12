@@ -42,7 +42,6 @@ export default function AdvancedDashboard() {
   const [summary,     setSummary]    = useState({});
   const [trend,       setTrend]      = useState([]);
   const [deptReport,  setDeptReport] = useState([]);
-  const [deptStats,   setDeptStats]  = useState([]);
   const [mostAbsent,  setMostAbsent] = useState([]);
   const [salaryRank,  setSalaryRank] = useState([]);
   const [assetStatus, setAssetStatus]= useState([]);
@@ -56,8 +55,7 @@ export default function AdvancedDashboard() {
     api.get("/reports/most-absent").then(r => setMostAbsent(r.data)).catch(() => {});
     api.get("/reports/salary-ranking").then(r => setSalaryRank(r.data)).catch(() => {});
 
-    // Department stats (avg salary, employee count)
-    api.get("/reports/department-stats").then(r => setDeptStats(r.data)).catch(() => {});
+
 
     // Asset status breakdown
     api.get("/assets", { params: { limit: 500 } })
@@ -96,14 +94,7 @@ export default function AdvancedDashboard() {
     rank: e.overall_rank,
   }));
 
-  // Dept avg salary
-  const deptAvgSalary = deptStats
-    .filter(d => d.avg_salary)
-    .map(d => ({
-      dept: d.department_name,
-      avg: Math.round(Number(d.avg_salary) || 0),
-      employees: Number(d.total_employees) || 0,
-    }));
+
 
   const leaveStatusData = [
     { name: "Pending (Mgr)", value: parseInt(summary.pending_manager) || 0 },
@@ -136,45 +127,69 @@ export default function AdvancedDashboard() {
           {absentTop8.length === 0 ? (
             <p style={{ color: "#94a3b8", textAlign: "center", padding: "40px 0" }}>No data yet</p>
           ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={absentTop8} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 12 }}
-                  tickFormatter={(v, i) => absentTop8[i]?.name || v}
-                />
-                <YAxis tick={{ fontSize: 12 }} label={{ value: "Days", angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 11, fill: "#94a3b8" } }} />
-                <Tooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const d = payload[0].payload;
-                    return (
-                      <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: "10px 14px", fontSize: 13 }}>
-                        <p style={{ margin: "0 0 2px", fontWeight: 600, color: "#1e293b" }}>{d.fullName}</p>
-                        <p style={{ margin: "2px 0", color: "#64748b" }}>{d.dept}</p>
-                        <p style={{ margin: 0, color: "#dc2626", fontWeight: 700 }}>{d.days} days absent</p>
-                      </div>
-                    );
-                  }}
-                />
-                <Bar dataKey="days" name="Days Absent" radius={[6, 6, 0, 0]}>
-                  {absentTop8.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "#dc2626" : i === 1 ? "#d97706" : "#2563eb"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-          {absentTop8.length > 0 && (
-            <div style={{ display: "flex", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
-              {[["#dc2626", "Most absent"], ["#d97706", "2nd most"], ["#2563eb", "Others"]].map(([c, l]) => (
-                <span key={l} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748b" }}>
-                  <span style={{ width: 10, height: 10, borderRadius: 2, background: c, display: "inline-block" }} />
-                  {l}
-                </span>
-              ))}
-            </div>
+            <>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={absentTop8} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(v, i) => absentTop8[i]?.name || v}
+                  />
+                  <YAxis tick={{ fontSize: 12 }} label={{ value: "Days", angle: -90, position: "insideLeft", offset: 10, style: { fontSize: 11, fill: "#94a3b8" } }} />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const d = payload[0].payload;
+                      return (
+                        <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: "10px 14px", fontSize: 13 }}>
+                          <p style={{ margin: "0 0 2px", fontWeight: 600, color: "#1e293b" }}>{d.fullName}</p>
+                          <p style={{ margin: "2px 0", color: "#64748b" }}>{d.dept}</p>
+                          <p style={{ margin: 0, color: "#dc2626", fontWeight: 700 }}>{d.days} days absent</p>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Bar dataKey="days" name="Days Absent" radius={[6, 6, 0, 0]}>
+                    {absentTop8.map((_, i) => (
+                      <Cell key={i} fill={i === 0 ? "#dc2626" : i === 1 ? "#d97706" : "#2563eb"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+
+              <div style={{ display: "flex", gap: 12, marginTop: 12, flexWrap: "wrap", marginBottom: 20 }}>
+                {[["#dc2626", "Most absent"], ["#d97706", "2nd most"], ["#2563eb", "Others"]].map(([c, l]) => (
+                  <span key={l} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748b" }}>
+                    <span style={{ width: 10, height: 10, borderRadius: 2, background: c, display: "inline-block" }} />
+                    {l}
+                  </span>
+                ))}
+              </div>
+
+              <div style={{ marginTop: 24, overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 500 }}>
+                  <thead>
+                    <tr style={{ borderBottom: "2px solid #e2e8f0", textAlign: "left" }}>
+                      <th style={{ padding: "10px 12px", color: "#475569", fontWeight: 600 }}>Rank</th>
+                      <th style={{ padding: "10px 12px", color: "#475569", fontWeight: 600 }}>Employee Name</th>
+                      <th style={{ padding: "10px 12px", color: "#475569", fontWeight: 600 }}>Department</th>
+                      <th style={{ padding: "10px 12px", color: "#475569", fontWeight: 600, textAlign: "right" }}>Days Absent</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {absentTop8.map((e, index) => (
+                      <tr key={index} style={{ borderBottom: "1px solid #f1f5f9" }}>
+                        <td style={{ padding: "10px 12px", fontWeight: 600, color: "#64748b" }}>#{index + 1}</td>
+                        <td style={{ padding: "10px 12px", color: "#1e293b", fontWeight: 600 }}>{e.fullName}</td>
+                        <td style={{ padding: "10px 12px", color: "#64748b" }}>{e.dept}</td>
+                        <td style={{ padding: "10px 12px", color: "#dc2626", fontWeight: 700, textAlign: "right" }}>{e.days} days</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </ChartCard>
 
@@ -317,49 +332,6 @@ export default function AdvancedDashboard() {
           )}
         </ChartCard>
 
-        {/* ⑤ Average salary by department ── */}
-        <ChartCard title="📊 Average Salary by Department" span={2}>
-          {deptAvgSalary.length === 0 ? (
-            <p style={{ color: "#94a3b8", textAlign: "center", padding: "40px 0" }}>No salary data</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={deptAvgSalary} margin={{ top: 8, right: 16, left: 16, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="dept" tick={{ fontSize: 12 }} />
-                <YAxis
-                  yAxisId="salary"
-                  orientation="left"
-                  tick={{ fontSize: 11 }}
-                  tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
-                />
-                <YAxis
-                  yAxisId="emp"
-                  orientation="right"
-                  tick={{ fontSize: 11 }}
-                  label={{ value: "Employees", angle: 90, position: "insideRight", offset: 10, style: { fontSize: 11, fill: "#94a3b8" } }}
-                />
-                <Tooltip
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length) return null;
-                    return (
-                      <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 8, padding: "10px 14px", fontSize: 13 }}>
-                        <p style={{ margin: "0 0 4px", fontWeight: 600, color: "#1e293b" }}>{label}</p>
-                        {payload.map((p, i) => (
-                          <p key={i} style={{ margin: "2px 0", color: p.color }}>
-                            {p.name}: <b>{p.name === "Avg Salary" ? `₹${Number(p.value).toLocaleString()}` : p.value}</b>
-                          </p>
-                        ))}
-                      </div>
-                    );
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar yAxisId="salary" dataKey="avg" name="Avg Salary" fill="#7c3aed" radius={[6, 6, 0, 0]} />
-                <Bar yAxisId="emp"    dataKey="employees" name="Employees" fill="#0891b2" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </ChartCard>
 
         {/* ⑥ Monthly leave trend ── */}
         <ChartCard title="📅 Monthly Leave Trend" span={2}>
