@@ -86,43 +86,7 @@ export default function AdvancedReports() {
     <Layout>
       <h2 style={{ color: "#1e293b", marginBottom: 24 }}>📋 Advanced Reports</h2>
 
-      {/* Global Search */}
-      <div style={{ background: "#fff", borderRadius: 10, padding: 20, marginBottom: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
-        <h3 style={{ margin: "0 0 12px", color: "#1e293b", fontSize: 15 }}>🔍 Global Search</h3>
-        <div style={{ display: "flex", gap: 10 }}>
-          <input value={searchQ} onChange={e => setSearchQ(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && doSearch()}
-            placeholder="Search employees, assets by name, email, code..." style={{ ...inp, flex: 1 }} />
-          <Button onClick={doSearch} disabled={searching}>{searching ? "Searching…" : "Search"}</Button>
-          {searchResults && <Button variant="secondary" onClick={() => setSearchResults(null)}>Clear</Button>}
-        </div>
-        {searchResults && (
-          <div style={{ marginTop: 16, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div>
-              <h4 style={{ color: "#475569", margin: "0 0 8px" }}>Employees ({searchResults.employees.length})</h4>
-              {searchResults.employees.length === 0 ? <p style={{ color: "#94a3b8" }}>No results</p> : (
-                searchResults.employees.map(e => (
-                  <div key={e.id} style={{ background: "#f8fafc", borderRadius: 8, padding: "10px 14px", marginBottom: 8 }}>
-                    <p style={{ margin: 0, fontWeight: 600, color: "#1e293b" }}>{e.name}</p>
-                    <p style={{ margin: "2px 0", fontSize: 13, color: "#64748b" }}>{e.designation} · {e.department_name}</p>
-                  </div>
-                ))
-              )}
-            </div>
-            <div>
-              <h4 style={{ color: "#475569", margin: "0 0 8px" }}>Assets ({searchResults.assets.length})</h4>
-              {searchResults.assets.length === 0 ? <p style={{ color: "#94a3b8" }}>No results</p> : (
-                searchResults.assets.map(a => (
-                  <div key={a.id} style={{ background: "#f8fafc", borderRadius: 8, padding: "10px 14px", marginBottom: 8 }}>
-                    <p style={{ margin: 0, fontWeight: 600, color: "#1e293b" }}>{a.asset_name}</p>
-                    <p style={{ margin: "2px 0", fontSize: 13, color: "#64748b" }}>{a.asset_code} · {a.status}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
